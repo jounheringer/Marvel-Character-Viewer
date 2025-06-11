@@ -11,6 +11,9 @@ composeBom = "2025.06.00"
 daggerHilt = "2.56.2"
 ksp = "2.0.21-1.0.27"
 googleFonts = "1.8.2"
+retrofit = "2.11.0"
+gson = "2.13.1"
+datastore = "1.1.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,6 +33,10 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "daggerHilt" }
 dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "daggerHilt" }
 google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "googleFonts" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+google-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

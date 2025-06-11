@@ -59,8 +59,18 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+//    Hilt
     implementation(libs.dagger.hilt)
     ksp(libs.dagger.hilt.compiler)
 
+//    Google
     implementation(libs.google.fonts)
+    implementation(libs.google.gson)
+
+//    Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+//    DataStore
+    implementation(libs.datastore)
 }
