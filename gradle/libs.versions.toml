@@ -14,6 +14,7 @@ googleFonts = "1.8.2"
 retrofit = "2.11.0"
 gson = "2.13.1"
 datastore = "1.1.7"
+okhttp = "4.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,6 +38,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 google-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+okhttp-logging = { module = 'com.squareup.okhttp3:logging-interceptor', version.ref = "okhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

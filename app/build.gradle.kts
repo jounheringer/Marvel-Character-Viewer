@@ -71,6 +71,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
+//    OkHTTP
+    implementation(libs.okhttp.logging)
+
 //    DataStore
     implementation(libs.datastore)
 }

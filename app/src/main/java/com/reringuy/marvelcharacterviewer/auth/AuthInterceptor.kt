@@ -20,7 +20,7 @@ class AuthInterceptor @Inject constructor(
         try {
             val response = chain.proceed(mainRequest.build())
 
-            if (response.code() == 403 && token != null) {
+            if (response.code == 403 && token != null) {
                 runBlocking {
                     tokenManager.clearToken()
                 }
