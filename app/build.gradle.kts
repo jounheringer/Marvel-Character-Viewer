@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,6 +14,9 @@ android {
     compileSdk = 35
 
     defaultConfig {
+        val localProperties = Properties()
+        localProperties.load(FileInputStream(rootProject.file("local.properties")))
+
         applicationId = "com.reringuy.marvelcharacterviewer"
         minSdk = 24
         targetSdk = 35
@@ -18,6 +24,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        android.buildFeatures.buildConfig = true
+
+        buildConfigField("String", "MARVEL_PUBLIC_KEY", "\"${localProperties.getProperty("MARVEL_PUBLIC_KEY")}\"")
+        buildConfigField("String", "MARVEL_PRIVATE_KEY", "\"${localProperties.getProperty("MARVEL_PRIVATE_KEY")}\"")
     }
 
     buildTypes {

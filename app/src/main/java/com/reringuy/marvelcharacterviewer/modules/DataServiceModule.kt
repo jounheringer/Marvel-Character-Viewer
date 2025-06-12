@@ -1,7 +1,9 @@
 package com.reringuy.marvelcharacterviewer.modules
 
 import com.google.gson.Gson
+import com.reringuy.marvelcharacterviewer.BuildConfig
 import com.reringuy.marvelcharacterviewer.auth.AuthInterceptor
+import com.reringuy.marvelcharacterviewer.repositories.MarvelRepository
 import com.reringuy.marvelcharacterviewer.services.MarvelService
 import com.reringuy.marvelcharacterviewer.utils.CustomEnviroment
 import dagger.Module
@@ -40,4 +42,11 @@ class DataServiceModule {
     @Provides
     fun provideMarvelService(retrofit: Retrofit.Builder): MarvelService =
         retrofit.build().create(MarvelService::class.java)
+
+    @Provides
+    fun provideMarvelRepository(apiService: MarvelService): MarvelRepository = MarvelRepository(
+        marvelService = apiService,
+        publicKey = BuildConfig.MARVEL_PUBLIC_KEY,
+        privateKey = BuildConfig.MARVEL_PRIVATE_KEY
+    )
 }
