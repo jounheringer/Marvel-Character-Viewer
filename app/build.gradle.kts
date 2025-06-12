@@ -69,9 +69,13 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+//    Constraint layout
+    implementation(libs.constraintlayout.compose)
+
 //    Hilt
     implementation(libs.dagger.hilt)
     ksp(libs.dagger.hilt.compiler)
+    implementation(libs.dagger.hilt.navigation.compose)
 
 //    Google
     implementation(libs.google.fonts)

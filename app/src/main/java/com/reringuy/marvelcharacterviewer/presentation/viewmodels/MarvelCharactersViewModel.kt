@@ -16,11 +16,10 @@ class MarvelCharactersViewModel @Inject constructor(
     private val marvelRepository: MarvelRepository,
 ) : ViewModel() {
 
-    private val _characters = MutableStateFlow<OperationHandler<List<MarvelCharacter>>>(
-        OperationHandler.Waiting
-    )
+    private val _characters =
+        MutableStateFlow<OperationHandler<List<MarvelCharacter>>>(OperationHandler.Waiting)
 
-    val characters = _characters.asStateFlow()
+    val characters get() = _characters.asStateFlow()
 
     init {
         getCharacters()
