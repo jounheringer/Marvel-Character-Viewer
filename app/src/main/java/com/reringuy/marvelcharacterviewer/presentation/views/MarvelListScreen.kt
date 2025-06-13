@@ -4,11 +4,13 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,7 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -67,9 +69,7 @@ fun MarvelCharactersWrapper(
 
         is OperationHandler.Success<*> -> {
             val data = (charactersState as OperationHandler.Success<List<MarvelCharacter>>).data
-            MarvelCharactersScreen(modifier, data) {
-
-            }
+            MarvelCharactersScreen(modifier, data)
         }
 
         else -> {
@@ -82,55 +82,78 @@ fun MarvelCharactersWrapper(
 fun MarvelCharactersScreen(
     modifier: Modifier,
     characters: List<MarvelCharacter>,
-    onCharacterClick: (MarvelCharacter) -> Unit,
 ) {
-    ConstraintLayout(
+    var currentCharacter: MarvelCharacter? by remember { mutableStateOf(null) }
+
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
     ) {
-        val (header, dropDown) = createRefs()
+        Column(modifier = Modifier.zIndex(2f)) {
+            MarvelCharacterHeader()
 
-        MarvelCharacterHeader(Modifier.constrainAs(header) {
-            top.linkTo(parent.top, margin = 16.dp)
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-        })
+            Spacer(Modifier.height(32.dp))
 
-        MarvelCharacterDropDown(
-            modifier = Modifier.constrainAs(dropDown) {
-                top.linkTo(header.bottom, margin = 32.dp)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            },
-            characters = characters,
-            onCharacterClick = onCharacterClick
-        )
+            MarvelCharacterDropDown(
+                characters = characters,
+                onCharacterClick = { currentCharacter = it }
+            )
+        }
+
+        MarvelCharacterInfo(modifier = Modifier.align(Alignment.Center), currentCharacter)
+    }
+}
+
+@Composable
+fun MarvelCharacterInfo(modifier: Modifier, character: MarvelCharacter?) {
+    character?.let {
+        Column(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AsyncImage(
+                modifier = Modifier.size(128.dp),
+                model = it.thumbnail.getFullPath().replace("http://", "https://"),
+                contentScale = ContentScale.Crop,
+                contentDescription = "${it.name} thumbnail"
+            )
+            Text(text = it.name, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = it.description,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MarvelCharacterDropDown(
-    modifier: Modifier,
     characters: List<MarvelCharacter>,
     onCharacterClick: (MarvelCharacter) -> Unit,
 ) {
     val commonInCardModifier = Modifier
         .fillMaxWidth()
         .padding(8.dp, 0.dp)
-    var expanded by remember { mutableStateOf(true) }
+    var expanded by remember { mutableStateOf(false) }
     var selectedText by remember { mutableStateOf("Selecione seu personagem") }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .background(
                 color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(12.dp)
             ),
     ) {
         Card(
+            shape = if (!expanded) CardDefaults.shape else RoundedCornerShape(
+                topStart = 12.dp,
+                topEnd = 12.dp
+            ),
             onClick = { expanded = !expanded },
             colors = CardDefaults.cardColors().copy(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -151,6 +174,7 @@ fun MarvelCharacterDropDown(
                 }
             }
         }
+
         if (expanded)
             LazyColumn(
                 modifier = commonInCardModifier
@@ -164,7 +188,6 @@ fun MarvelCharacterDropDown(
                     }
                 }
             }
-
     }
 }
 
@@ -195,10 +218,9 @@ fun MarvelCharacterOption(character: MarvelCharacter, onCharacterClick: (MarvelC
 }
 
 @Composable
-fun MarvelCharacterHeader(modifier: Modifier) {
+fun MarvelCharacterHeader() {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "Bem-vindo ao Marvel Character Viewer",
@@ -292,10 +314,25 @@ fun MarvelCharactersScreenPreview() {
         ),
     )
     MarvelCharacterViewerTheme {
-        MarvelCharactersScreen(Modifier, marvelCharacters) {
-
-        }
+        MarvelCharactersScreen(Modifier, marvelCharacters)
     }
 }
 
+
+@Preview(showBackground = true, name = "Marvel Character Info")
+@Composable
+fun MarvelCharacterInfoPreview() {
+    val currentCharacter = MarvelCharacter(
+        id = 1,
+        name = "Spider-Man",
+        description = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+        thumbnail = MarvelThumbnail(
+            path = "https://i.annihil.us/u/prod/marvel/i/mg/c/20/52602f21f29ec",
+            extension = "jpg"
+        )
+    )
+    MarvelCharacterViewerTheme {
+        MarvelCharacterInfo(Modifier, currentCharacter)
+    }
+}
 
