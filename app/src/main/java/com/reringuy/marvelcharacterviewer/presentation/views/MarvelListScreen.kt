@@ -91,28 +91,11 @@ fun MarvelCharactersScreen(
     ) {
         val (header, dropDown) = createRefs()
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .constrainAs(header) {
-                    top.linkTo(parent.top, margin = 16.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-
-        ) {
-            Text(
-                text = "Bem-vindo ao Marvel Character Viewer",
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = "Selecione seu personagem favorito e descubra tudo sobre ele.",
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
-            )
-        }
+        MarvelCharacterHeader(Modifier.constrainAs(header) {
+            top.linkTo(parent.top, margin = 16.dp)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        })
 
         MarvelCharacterDropDown(
             modifier = Modifier.constrainAs(dropDown) {
@@ -174,7 +157,11 @@ fun MarvelCharacterDropDown(
                     .heightIn(max = 500.dp)
             ) {
                 items(characters) {
-                    MarvelCharacterOption(it, onCharacterClick)
+                    MarvelCharacterOption(it) {
+                        expanded = false
+                        selectedText = it.name
+                        onCharacterClick(it)
+                    }
                 }
             }
 
@@ -204,6 +191,26 @@ fun MarvelCharacterOption(character: MarvelCharacter, onCharacterClick: (MarvelC
                 Text(text = character.description, maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
         }
+    }
+}
+
+@Composable
+fun MarvelCharacterHeader(modifier: Modifier) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        Text(
+            text = "Bem-vindo ao Marvel Character Viewer",
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = "Selecione seu personagem favorito e descubra tudo sobre ele.",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
