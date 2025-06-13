@@ -90,4 +90,8 @@ dependencies {
 
 //    DataStore
     implementation(libs.datastore)
+
+//    coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }
