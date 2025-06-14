@@ -26,7 +26,7 @@ class MarvelRepository @Inject constructor(
     }
 
     fun getCharacterComics(characterId: Int) = Pager(
-        config = PagingConfig(pageSize = 20),
+        config = PagingConfig(pageSize = 100),
         pagingSourceFactory = { ComicsPagingSource(marvelService, characterId) }
     ).flow
 }

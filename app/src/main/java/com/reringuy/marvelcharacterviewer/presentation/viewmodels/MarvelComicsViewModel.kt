@@ -52,6 +52,7 @@ class MarvelComicsViewModel @Inject constructor(
             tokenManager.collectCharacter().collect {
                 if (it != null) {
                     _currentCharacter.value = OperationHandler.Success(it)
+//                    SpiderMan id = 1009610
                     getCharacterComics(it.id)
                 } else
                     _currentCharacter.value = OperationHandler.Error("No character found")
