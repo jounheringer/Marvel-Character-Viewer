@@ -134,11 +134,11 @@ fun MarvelCharacterDropDown(
         .fillMaxWidth()
         .padding(8.dp, 0.dp)
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("Carregando lista") }
+    var selectedText by remember { mutableStateOf("Loading list") }
 
     LaunchedEffect(characters) {
         if (characters is OperationHandler.Success)
-            selectedText = "Selecione seu personagem"
+            selectedText = "Select your character"
     }
 
     Column(
@@ -169,9 +169,9 @@ fun MarvelCharacterDropDown(
                 Text(text = selectedText)
                 IconButton(onClick = { expanded = !expanded }) {
                     if (!expanded)
-                        Icon(Icons.Filled.KeyboardArrowUp, "Fechado")
+                        Icon(Icons.Filled.KeyboardArrowUp, "Closed")
                     else
-                        Icon(Icons.Filled.KeyboardArrowDown, "Aberto")
+                        Icon(Icons.Filled.KeyboardArrowDown, "Open")
                 }
             }
         }
@@ -236,13 +236,13 @@ fun MarvelCharacterHeader() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Bem-vindo ao Marvel Character Viewer",
+            text = "Welcome to the Marvel Character Viewer",
             style = MaterialTheme.typography.displaySmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
         Text(
-            text = "Selecione seu personagem favorito e descubra tudo sobre ele.",
+            text = "Select your favorite character and find out all about them.",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
