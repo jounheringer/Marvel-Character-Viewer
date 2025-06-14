@@ -2,7 +2,6 @@ package com.reringuy.marvelcharacterviewer.modules
 
 import android.content.Context
 import com.google.gson.Gson
-import com.reringuy.marvelcharacterviewer.auth.AuthInterceptor
 import com.reringuy.marvelcharacterviewer.auth.TokenManager
 import dagger.Module
 import dagger.Provides
@@ -21,8 +20,4 @@ class SingletonModules {
     @Provides
     @Singleton
     fun provideGson(): Gson = Gson()
-
-    @Provides
-    @Singleton
-    fun provideAuthInterceptor(tokenManager: TokenManager) = AuthInterceptor(tokenManager)
 }

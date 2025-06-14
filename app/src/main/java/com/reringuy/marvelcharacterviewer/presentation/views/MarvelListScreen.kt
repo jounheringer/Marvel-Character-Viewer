@@ -1,7 +1,6 @@
 package com.reringuy.marvelcharacterviewer.presentation.views
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,13 +31,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,7 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
 import com.reringuy.marvelcharacterviewer.models.MarvelThumbnail
-import com.reringuy.marvelcharacterviewer.presentation.components.Loading
+import com.reringuy.marvelcharacterviewer.presentation.components.MarvelCharacterOperationHandler
 import com.reringuy.marvelcharacterviewer.presentation.viewmodels.MarvelCharactersViewModel
 import com.reringuy.marvelcharacterviewer.ui.theme.MarvelCharacterViewerTheme
 import com.reringuy.marvelcharacterviewer.utils.OperationHandler
@@ -58,33 +58,24 @@ import com.reringuy.marvelcharacterviewer.utils.OperationHandler
 fun MarvelCharactersWrapper(
     modifier: Modifier,
     viewModel: MarvelCharactersViewModel = hiltViewModel(),
+    onListComics: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val charactersState by viewModel.characters.collectAsStateWithLifecycle()
-    when (charactersState) {
-        is OperationHandler.Error -> {
-            val message = (charactersState as OperationHandler.Error).message
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        }
+    val charactersList by viewModel.characters.collectAsStateWithLifecycle()
+    val currentCharacter by viewModel.currentCharacter.collectAsStateWithLifecycle()
 
-        is OperationHandler.Success<*> -> {
-            val data = (charactersState as OperationHandler.Success<List<MarvelCharacter>>).data
-            MarvelCharactersScreen(modifier, data)
-        }
-
-        else -> {
-            Loading()
-        }
+    MarvelCharactersScreen(modifier, charactersList, currentCharacter, onListComics) {
+        viewModel.setCurrentCharacter(it)
     }
 }
 
 @Composable
 fun MarvelCharactersScreen(
     modifier: Modifier,
-    characters: List<MarvelCharacter>,
+    characters: OperationHandler<List<MarvelCharacter>>,
+    currentCharacter: OperationHandler<MarvelCharacter>,
+    onListComics: () -> Unit,
+    onCharacterSelected: (MarvelCharacter) -> Unit,
 ) {
-    var currentCharacter: MarvelCharacter? by remember { mutableStateOf(null) }
-
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -97,34 +88,51 @@ fun MarvelCharactersScreen(
 
             MarvelCharacterDropDown(
                 characters = characters,
-                onCharacterClick = { currentCharacter = it }
+                onCharacterClick = onCharacterSelected
             )
         }
 
-        MarvelCharacterInfo(modifier = Modifier.align(Alignment.Center), currentCharacter)
+        MarvelCharacterOperationHandler(currentCharacter, Modifier.align(Alignment.Center)) {
+            MarvelCharacterInfo(
+                modifier = Modifier.align(Alignment.Center),
+                it.data,
+                onListComics
+            ) {
+                onCharacterSelected(it)
+            }
+        }
     }
 }
 
 @Composable
-fun MarvelCharacterInfo(modifier: Modifier, character: MarvelCharacter?) {
-    character?.let {
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AsyncImage(
-                modifier = Modifier.size(128.dp),
-                model = it.thumbnail.getFullPath().replace("http://", "https://"),
-                contentScale = ContentScale.Crop,
-                contentDescription = "${it.name} thumbnail"
-            )
-            Text(text = it.name, style = MaterialTheme.typography.titleLarge)
-            Text(
-                text = it.description,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
-            )
+fun MarvelCharacterInfo(
+    modifier: Modifier,
+    character: MarvelCharacter,
+    onListComics: () -> Unit,
+    onCharacterSelected: (MarvelCharacter) -> Unit,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AsyncImage(
+            modifier = Modifier.size(128.dp),
+            model = character.thumbnail.getFullPath().replace("http://", "https://"),
+            contentScale = ContentScale.Crop,
+            contentDescription = "${character.name} thumbnail"
+        )
+        Text(text = character.name, style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = character.description,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Button(onClick = onListComics) {
+            Text("List Comics")
         }
     }
 }
@@ -132,14 +140,19 @@ fun MarvelCharacterInfo(modifier: Modifier, character: MarvelCharacter?) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MarvelCharacterDropDown(
-    characters: List<MarvelCharacter>,
+    characters: OperationHandler<List<MarvelCharacter>>,
     onCharacterClick: (MarvelCharacter) -> Unit,
 ) {
     val commonInCardModifier = Modifier
         .fillMaxWidth()
         .padding(8.dp, 0.dp)
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("Selecione seu personagem") }
+    var selectedText by remember { mutableStateOf("Carregando lista") }
+
+    LaunchedEffect(characters) {
+        if (characters is OperationHandler.Success)
+            selectedText = "Selecione seu personagem"
+    }
 
     Column(
         modifier = Modifier
@@ -150,6 +163,7 @@ fun MarvelCharacterDropDown(
             ),
     ) {
         Card(
+            enabled = characters is OperationHandler.Success,
             shape = if (!expanded) CardDefaults.shape else RoundedCornerShape(
                 topStart = 12.dp,
                 topEnd = 12.dp
@@ -175,21 +189,33 @@ fun MarvelCharacterDropDown(
             }
         }
 
-        if (expanded)
-            LazyColumn(
-                modifier = commonInCardModifier
-                    .heightIn(max = 500.dp)
-            ) {
-                items(characters) {
-                    MarvelCharacterOption(it) {
-                        expanded = false
-                        selectedText = it.name
-                        onCharacterClick(it)
-                    }
-                }
+        if (expanded && characters is OperationHandler.Success)
+            MarvelCharactersList(commonInCardModifier, characters.data) {
+                expanded = false
+                selectedText = it.name
+                onCharacterClick(it)
             }
     }
 }
+
+@Composable
+fun MarvelCharactersList(
+    modifier: Modifier,
+    characters: List<MarvelCharacter>,
+    onCharacterClick: (MarvelCharacter) -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier
+            .heightIn(max = 500.dp)
+    ) {
+        items(characters) {
+            MarvelCharacterOption(it) {
+                onCharacterClick(it)
+            }
+        }
+    }
+}
+
 
 @Composable
 fun MarvelCharacterOption(character: MarvelCharacter, onCharacterClick: (MarvelCharacter) -> Unit) {
@@ -314,7 +340,13 @@ fun MarvelCharactersScreenPreview() {
         ),
     )
     MarvelCharacterViewerTheme {
-        MarvelCharactersScreen(Modifier, marvelCharacters)
+        MarvelCharactersScreen(
+            Modifier,
+            OperationHandler.Success(marvelCharacters),
+            OperationHandler.Error("asdasd"),
+            {}) {
+
+        }
     }
 }
 
@@ -332,7 +364,9 @@ fun MarvelCharacterInfoPreview() {
         )
     )
     MarvelCharacterViewerTheme {
-        MarvelCharacterInfo(Modifier, currentCharacter)
+        MarvelCharacterInfo(Modifier, currentCharacter, {}) {
+
+        }
     }
 }
 

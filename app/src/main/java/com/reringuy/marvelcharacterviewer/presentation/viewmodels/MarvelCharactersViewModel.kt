@@ -2,6 +2,7 @@ package com.reringuy.marvelcharacterviewer.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.reringuy.marvelcharacterviewer.auth.TokenManager
 import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
 import com.reringuy.marvelcharacterviewer.repositories.MarvelRepository
 import com.reringuy.marvelcharacterviewer.utils.OperationHandler
@@ -14,6 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MarvelCharactersViewModel @Inject constructor(
     private val marvelRepository: MarvelRepository,
+    private val tokenManager: TokenManager,
 ) : ViewModel() {
 
     private val _characters =
@@ -21,11 +23,17 @@ class MarvelCharactersViewModel @Inject constructor(
 
     val characters get() = _characters.asStateFlow()
 
+    private val _currentCharacter =
+        MutableStateFlow<OperationHandler<MarvelCharacter>>(OperationHandler.Waiting)
+
+    val currentCharacter get() = _currentCharacter.asStateFlow()
+
     init {
         getCharacters()
+        getCurrentCharacter()
     }
 
-    fun getCharacters() {
+    private fun getCharacters() {
         _characters.value = OperationHandler.Loading
         viewModelScope.launch {
             try {
@@ -33,6 +41,25 @@ class MarvelCharactersViewModel @Inject constructor(
                 _characters.value = OperationHandler.Success(characters)
             } catch (e: Exception) {
                 _characters.value = OperationHandler.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    fun setCurrentCharacter(character: MarvelCharacter) {
+        _currentCharacter.value = OperationHandler.Success(character)
+        viewModelScope.launch {
+            tokenManager.saveCharacter(character)
+        }
+    }
+
+    private fun getCurrentCharacter() {
+        _currentCharacter.value = OperationHandler.Loading
+        viewModelScope.launch {
+            tokenManager.collectCharacter().collect {
+                if (it != null)
+                    _currentCharacter.value = OperationHandler.Success(it)
+                else
+                    _currentCharacter.value = OperationHandler.Error("No character found")
             }
         }
     }

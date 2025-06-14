@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.gson.Gson
+import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -13,25 +15,21 @@ class TokenManager(
     private val context: Context,
 ) {
     companion object {
-        val TOKEN_KEY = stringPreferencesKey("token")
+        val CURRENT_CHARACTER_KEY = stringPreferencesKey("current_character")
     }
 
     val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "data_store")
 
 
-    suspend fun saveToken(token: String) {
+    suspend fun saveCharacter(character: MarvelCharacter) {
         context.dataStore.edit { preferences ->
-            preferences[TOKEN_KEY] = token
+            preferences[CURRENT_CHARACTER_KEY] = Gson().toJson(character)
         }
     }
 
-    suspend fun clearToken() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(TOKEN_KEY)
+    fun collectCharacter(): Flow<MarvelCharacter?> {
+        return context.dataStore.data.map { preferences ->
+            Gson().fromJson(preferences[CURRENT_CHARACTER_KEY], MarvelCharacter::class.java)
         }
-    }
-
-    fun collectToken(): Flow<String?> {
-        return context.dataStore.data.map { preferences -> preferences[TOKEN_KEY] }
     }
 }
