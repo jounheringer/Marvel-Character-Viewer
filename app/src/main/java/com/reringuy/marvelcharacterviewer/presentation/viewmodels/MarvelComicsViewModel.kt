@@ -11,9 +11,11 @@ import com.reringuy.marvelcharacterviewer.models.MarvelComic
 import com.reringuy.marvelcharacterviewer.repositories.MarvelRepository
 import com.reringuy.marvelcharacterviewer.utils.OperationHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,6 +24,9 @@ class MarvelComicsViewModel @Inject constructor(
     private val tokenManager: TokenManager,
     private val marvelRepository: MarvelRepository,
 ) : ViewModel() {
+    private val _effect = Channel<String>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
+
     private var _comicsList: Flow<PagingData<MarvelComic>>? = null
     val comicsList get() = _comicsList
 
@@ -34,7 +39,14 @@ class MarvelComicsViewModel @Inject constructor(
         getCurrenCharacter()
     }
 
-    fun getCharacterComics(characterId: Int) {
+    fun setCurrentComic(comic: MarvelComic) {
+        viewModelScope.launch {
+            tokenManager.saveComic(comic)
+            _effect.trySend("${comic.title} saved successfully.")
+        }
+    }
+
+    private fun getCharacterComics(characterId: Int) {
         viewModelScope.launch {
             try {
                 val response = marvelRepository.getCharacterComics(characterId)

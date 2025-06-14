@@ -1,5 +1,6 @@
 package com.reringuy.marvelcharacterviewer.presentation.views
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,11 +41,26 @@ fun MarvelComicsWrapper(
     modifier: Modifier,
     viewModel: MarvelComicsViewModel = hiltViewModel(),
     onCharacterNameLoaded: (String) -> Unit,
+    onComicSaved: () -> Unit,
 ) {
     val comics = viewModel.comicsList?.collectAsLazyPagingItems()
     val currentCharacter by viewModel.currentCharacter.collectAsStateWithLifecycle()
+    val savedEffect = viewModel.effect
 
-    MarvelComicsScreen(modifier, comics, currentCharacter, onCharacterNameLoaded)
+    LaunchedEffect(savedEffect) {
+        savedEffect.collect {
+            Log.d("MarvelCharacter.Effect", it)
+            onComicSaved()
+        }
+    }
+
+    MarvelComicsScreen(
+        modifier,
+        comics,
+        currentCharacter,
+        onCharacterNameLoaded,
+        viewModel::setCurrentComic
+    )
 }
 
 @Composable
@@ -52,6 +69,7 @@ fun MarvelComicsScreen(
     comics: LazyPagingItems<MarvelComic>?,
     currentCharacter: OperationHandler<MarvelCharacter>,
     onCharacterNameLoaded: (String) -> Unit,
+    onComicSelected: (MarvelComic) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -67,22 +85,25 @@ fun MarvelComicsScreen(
             Text("asdfasd")
 
         if (comics != null)
-            MarvelComicsList(comics)
+            MarvelComicsList(comics, onComicSelected)
     }
 }
 
 @Composable
-fun MarvelComicsList(comics: LazyPagingItems<MarvelComic>) {
+fun MarvelComicsList(comics: LazyPagingItems<MarvelComic>, onComicSelected: (MarvelComic) -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         items(comics.itemCount) { index ->
             val comic = comics[index]
             if (comic != null)
-                MarvelComicOption(comic)
+                MarvelComicOption(comic, onComicSelected)
 
         }
         when (comics.loadState.refresh) {
             is LoadState.Loading -> item {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     Text("Loading...")
                 }
             }
@@ -94,8 +115,12 @@ fun MarvelComicsList(comics: LazyPagingItems<MarvelComic>) {
 }
 
 @Composable
-fun MarvelComicOption(comic: MarvelComic) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth(), onClick = {}, shape = CutCornerShape(0.dp)) {
+fun MarvelComicOption(comic: MarvelComic, onComicSelected: (MarvelComic) -> Unit) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { onComicSelected(comic) },
+        shape = CutCornerShape(0.dp)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 modifier = Modifier.size(128.dp),
@@ -103,10 +128,7 @@ fun MarvelComicOption(comic: MarvelComic) {
                 contentDescription = "${comic.title} thumbnail"
             )
             Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "#${comic.issueNumber}")
-                    Text(text = comic.title)
-                }
+                Text(text = comic.title)
                 Text(text = comic.description, maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -145,6 +167,6 @@ fun MarvelComicsWrapperPreview() {
             currentCharacter = OperationHandler.Success(dummyCharacter),
             onCharacterNameLoaded = {
             }
-        )
+        ) {}
     }
 }

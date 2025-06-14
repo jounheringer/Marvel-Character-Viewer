@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -20,19 +21,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.reringuy.marvelcharacterviewer.presentation.views.MarvelComicsWrapper
 import com.reringuy.marvelcharacterviewer.ui.theme.MarvelCharacterViewerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class CharacterComicsActivity : ComponentActivity() {
-
+class ComicDetailsActivity: ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            var topBarTitle by remember { mutableStateOf("Character Comics") }
+            var topBarTitle by remember { mutableStateOf("Comic Details") }
             MarvelCharacterViewerTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -47,24 +46,16 @@ class CharacterComicsActivity : ComponentActivity() {
                         })
                     }
                 ) { innerPadding ->
-                    MarvelComicsWrapper(
-                        modifier = Modifier.padding(innerPadding),
-                        onCharacterNameLoaded = { topBarTitle = "$it Comics" },
-                        onComicSaved = { goToComicsDetail() }
-                    )
+                    Box(Modifier.padding(innerPadding)){
+                        Text("Comic Details")
+                    }
                 }
             }
         }
     }
 
-    private fun goToComicsDetail() {
-        val intent = Intent(this, ComicDetailsActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
-
     private fun goBack() {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, CharacterComicsActivity::class.java)
         startActivity(intent)
         finish()
     }
