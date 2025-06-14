@@ -97,9 +97,7 @@ fun MarvelCharactersScreen(
                 modifier = Modifier.align(Alignment.Center),
                 it.data,
                 onListComics
-            ) {
-                onCharacterSelected(it)
-            }
+            )
         }
     }
 }
@@ -109,7 +107,6 @@ fun MarvelCharacterInfo(
     modifier: Modifier,
     character: MarvelCharacter,
     onListComics: () -> Unit,
-    onCharacterSelected: (MarvelCharacter) -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -364,9 +361,7 @@ fun MarvelCharacterInfoPreview() {
         )
     )
     MarvelCharacterViewerTheme {
-        MarvelCharacterInfo(Modifier, currentCharacter, {}) {
-
-        }
+        MarvelCharacterInfo(Modifier, currentCharacter) {}
     }
 }
 
