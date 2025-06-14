@@ -1,5 +1,6 @@
 package com.reringuy.marvelcharacterviewer
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,11 +21,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             MarvelCharacterViewerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MarvelCharactersWrapper(Modifier.padding(innerPadding)){
-
+                    MarvelCharactersWrapper(Modifier.padding(innerPadding)) {
+                        goToInfoActivity()
                     }
                 }
             }
         }
     }
+
+    private fun goToInfoActivity() {
+        val intent = Intent(this, CharacterComicsActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
 }

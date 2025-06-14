@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
 import com.reringuy.marvelcharacterviewer.models.MarvelThumbnail
+import com.reringuy.marvelcharacterviewer.presentation.components.CharacterInfo
 import com.reringuy.marvelcharacterviewer.presentation.components.MarvelCharacterOperationHandler
 import com.reringuy.marvelcharacterviewer.presentation.viewmodels.MarvelCharactersViewModel
 import com.reringuy.marvelcharacterviewer.ui.theme.MarvelCharacterViewerTheme
@@ -113,18 +114,7 @@ fun MarvelCharacterInfo(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AsyncImage(
-            modifier = Modifier.size(128.dp),
-            model = character.thumbnail.getFullPath().replace("http://", "https://"),
-            contentScale = ContentScale.Crop,
-            contentDescription = "${character.name} thumbnail"
-        )
-        Text(text = character.name, style = MaterialTheme.typography.titleLarge)
-        Text(
-            text = character.description,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
-        )
+        CharacterInfo(character)
 
         Spacer(Modifier.height(16.dp))
 

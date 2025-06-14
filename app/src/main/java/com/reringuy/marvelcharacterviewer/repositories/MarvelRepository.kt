@@ -1,6 +1,7 @@
 package com.reringuy.marvelcharacterviewer.repositories
 
 import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
+import com.reringuy.marvelcharacterviewer.models.MarvelComic
 import com.reringuy.marvelcharacterviewer.services.MarvelService
 import com.reringuy.marvelcharacterviewer.utils.generateMarvelHash
 import javax.inject.Inject
@@ -10,7 +11,6 @@ class MarvelRepository @Inject constructor(
     private val publicKey: String,
     private val privateKey: String
 ) {
-
     suspend fun getCharacters(): List<MarvelCharacter>{
         val timeStamp = System.currentTimeMillis().toString()
         val hash = generateMarvelHash(timeStamp, privateKey, publicKey)
@@ -21,6 +21,16 @@ class MarvelRepository @Inject constructor(
             limit = 100,
             offset = 0
         ).data.results
+    }
 
+    suspend fun getCharacterComics(characterId: Int): List<MarvelComic> {
+        val timeStamp = System.currentTimeMillis().toString()
+        val hash = generateMarvelHash(timeStamp, privateKey, publicKey)
+        return marvelService.getCharacterComics(
+            characterId = characterId,
+            timestamp = timeStamp,
+            apiKey = publicKey,
+            hash = hash
+        )
     }
 }
