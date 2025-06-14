@@ -1,13 +1,17 @@
 package com.reringuy.marvelcharacterviewer.presentation.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.reringuy.marvelcharacterviewer.auth.TokenManager
 import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
 import com.reringuy.marvelcharacterviewer.models.MarvelComic
 import com.reringuy.marvelcharacterviewer.repositories.MarvelRepository
 import com.reringuy.marvelcharacterviewer.utils.OperationHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -18,25 +22,26 @@ class MarvelComicsViewModel @Inject constructor(
     private val tokenManager: TokenManager,
     private val marvelRepository: MarvelRepository,
 ) : ViewModel() {
+    private var _comicsList: Flow<PagingData<MarvelComic>>? = null
+    val comicsList get() = _comicsList
+
     private val _currentCharacter =
         MutableStateFlow<OperationHandler<MarvelCharacter>>(OperationHandler.Waiting)
-    private val _comicsList =
-        MutableStateFlow<OperationHandler<List<MarvelComic>>>(OperationHandler.Waiting)
-    val comicsList get() = _comicsList.asStateFlow()
+
     val currentCharacter get() = _currentCharacter.asStateFlow()
 
     init {
         getCurrenCharacter()
     }
 
-    private fun getCharacterComics(characterId: Int) {
-        _comicsList.value = OperationHandler.Loading
+    fun getCharacterComics(characterId: Int) {
         viewModelScope.launch {
             try {
-                val comics = marvelRepository.getCharacterComics(characterId)
-                _comicsList.value = OperationHandler.Success(comics)
+                val response = marvelRepository.getCharacterComics(characterId)
+                _comicsList = response.cachedIn(viewModelScope)
             } catch (e: Exception) {
-                _comicsList.value = OperationHandler.Error(e.message ?: "Unknown error")
+                Log.e("MarvelComicsViewModel", "Error fetching comics: ${e.message}")
+                _comicsList = null
             }
         }
     }

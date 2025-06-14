@@ -1,7 +1,9 @@
 package com.reringuy.marvelcharacterviewer.repositories
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
-import com.reringuy.marvelcharacterviewer.models.MarvelComic
+import com.reringuy.marvelcharacterviewer.presentation.paging.ComicsPagingSource
 import com.reringuy.marvelcharacterviewer.services.MarvelService
 import com.reringuy.marvelcharacterviewer.utils.generateMarvelHash
 import javax.inject.Inject
@@ -23,14 +25,8 @@ class MarvelRepository @Inject constructor(
         ).data.results
     }
 
-    suspend fun getCharacterComics(characterId: Int): List<MarvelComic> {
-        val timeStamp = System.currentTimeMillis().toString()
-        val hash = generateMarvelHash(timeStamp, privateKey, publicKey)
-        return marvelService.getCharacterComics(
-            characterId = characterId,
-            timestamp = timeStamp,
-            apiKey = publicKey,
-            hash = hash
-        )
-    }
+    fun getCharacterComics(characterId: Int) = Pager(
+        config = PagingConfig(pageSize = 20),
+        pagingSourceFactory = { ComicsPagingSource(marvelService, characterId) }
+    ).flow
 }

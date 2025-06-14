@@ -3,6 +3,7 @@ package com.reringuy.marvelcharacterviewer.presentation.views
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,6 +15,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.reringuy.marvelcharacterviewer.presentation.viewmodels.MarvelComicsViewModel
 import com.reringuy.marvelcharacterviewer.ui.theme.MarvelCharacterViewerTheme
 import androidx.compose.runtime.getValue
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
 import com.reringuy.marvelcharacterviewer.models.MarvelComic
 import com.reringuy.marvelcharacterviewer.presentation.components.CharacterInfo
@@ -25,7 +29,7 @@ fun MarvelComicsWrapper(
     viewModel: MarvelComicsViewModel = hiltViewModel(),
     onCharacterNameLoaded: (String) -> Unit,
 ) {
-    val comics by viewModel.comicsList.collectAsStateWithLifecycle()
+    val comics = viewModel.comicsList?.collectAsLazyPagingItems()
     val currentCharacter by viewModel.currentCharacter.collectAsStateWithLifecycle()
 
     MarvelComicsScreen(modifier, comics, currentCharacter, onCharacterNameLoaded)
@@ -34,7 +38,7 @@ fun MarvelComicsWrapper(
 @Composable
 fun MarvelComicsScreen(
     modifier: Modifier,
-    comics: OperationHandler<List<MarvelComic>>,
+    comics: LazyPagingItems<MarvelComic>?,
     currentCharacter: OperationHandler<MarvelCharacter>,
     onCharacterNameLoaded: (String) -> Unit,
 ) {
@@ -49,8 +53,21 @@ fun MarvelComicsScreen(
             onCharacterNameLoaded(character.name.substringBefore(" ("))
             CharacterInfo(character)
         } else
-
             Text("asdfasd")
+
+        if (comics != null)
+            LazyColumn {
+                items(comics.itemCount) { index ->
+                    val comic = comics[index]
+                    if (comic != null)
+                        Text(text = comic.title)
+                }
+                when (comics.loadState.refresh) {
+                    is LoadState.Loading -> item { Text("Loading...") }
+                    is LoadState.Error -> item { Text("Error") }
+                    else -> Unit
+                }
+            }
     }
 }
 

@@ -1,6 +1,6 @@
 package com.reringuy.marvelcharacterviewer.services
 
-import com.reringuy.marvelcharacterviewer.models.MarvelComic
+import com.reringuy.marvelcharacterviewer.models.MarvelComicsWrapper
 import com.reringuy.marvelcharacterviewer.models.MarvelResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -24,5 +24,5 @@ interface MarvelService {
         @Query("hash") hash: String,
         @Query("limit") limit: Int = 5,
         @Query("offset") offset: Int = 0
-    ): List<MarvelComic>
+    ): MarvelComicsWrapper
 }

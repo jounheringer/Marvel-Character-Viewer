@@ -18,6 +18,7 @@ okhttp = "4.12.0"
 daggerHiltNavigation = "1.3.0-alpha01"
 constraintlayoutCompose = "1.1.1"
 coil = "3.2.0"
+pagingVersion = "3.3.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,6 +47,8 @@ dagger-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigat
 constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "pagingVersion" }
+paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
