@@ -55,11 +55,15 @@ class MarvelCharactersViewModel @Inject constructor(
     private fun getCurrentCharacter() {
         _currentCharacter.value = OperationHandler.Loading
         viewModelScope.launch {
-            tokenManager.collectCharacter().collect {
-                if (it != null)
-                    _currentCharacter.value = OperationHandler.Success(it)
-                else
-                    _currentCharacter.value = OperationHandler.Error("No character found")
+            try {
+                tokenManager.collectCharacter().collect {
+                    if (it != null)
+                        _currentCharacter.value = OperationHandler.Success(it)
+                    else
+                        _currentCharacter.value = OperationHandler.Error("No character found")
+                }
+            } catch (e: Exception) {
+                _currentCharacter.value = OperationHandler.Error(e.message ?: "Unknown error")
             }
         }
     }
