@@ -50,8 +50,11 @@ fun MarvelComicsWrapper(
 
     LaunchedEffect(savedEffect) {
         savedEffect.collect {
-            Log.d("MarvelCharacter.Effect", it.title)
-            onComicSaved(it)
+            if (it != null){
+                Log.d("MarvelCharacter.Effect", it.title)
+                onComicSaved(it)
+            } else
+                Log.d("MarvelCharacter.Effect", "Error")
         }
     }
 
