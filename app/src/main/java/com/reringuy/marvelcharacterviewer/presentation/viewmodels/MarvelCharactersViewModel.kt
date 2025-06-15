@@ -1,11 +1,15 @@
 package com.reringuy.marvelcharacterviewer.presentation.viewmodels
 
+import android.content.Context
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.reringuy.marvelcharacterviewer.auth.TokenManager
 import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
+import com.reringuy.marvelcharacterviewer.presentation.glance.GlanceWidget
 import com.reringuy.marvelcharacterviewer.repositories.MarvelRepository
 import com.reringuy.marvelcharacterviewer.utils.OperationHandler
+import com.reringuy.marvelcharacterviewer.utils.refreshWidget
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,10 +49,15 @@ class MarvelCharactersViewModel @Inject constructor(
         }
     }
 
-    fun setCurrentCharacter(character: MarvelCharacter) {
+    fun setCurrentCharacter(character: MarvelCharacter, context: Context) {
         _currentCharacter.value = OperationHandler.Success(character)
         viewModelScope.launch {
             tokenManager.saveCharacter(character)
+            val glanceId = GlanceAppWidgetManager(context)
+                .getGlanceIds(GlanceWidget::class.java)
+                .firstOrNull()
+            if (glanceId != null)
+                refreshWidget(context, tokenManager, glanceId)
         }
     }
 

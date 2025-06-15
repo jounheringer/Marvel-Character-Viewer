@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,6 +65,7 @@ fun MarvelCharactersWrapper(
     viewModel: MarvelCharactersViewModel = hiltViewModel(),
     onListComics: () -> Unit,
 ) {
+    val context = LocalContext.current
     val charactersList by viewModel.characters.collectAsStateWithLifecycle()
     val currentCharacter by viewModel.currentCharacter.collectAsStateWithLifecycle()
 
@@ -74,7 +76,7 @@ fun MarvelCharactersWrapper(
         onListComics,
         viewModel::setCharactersByName
     ) {
-        viewModel.setCurrentCharacter(it)
+        viewModel.setCurrentCharacter(it, context)
     }
 }
 

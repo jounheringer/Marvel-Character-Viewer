@@ -103,4 +103,8 @@ dependencies {
 //    Test
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+
+//    Glance
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
 }
