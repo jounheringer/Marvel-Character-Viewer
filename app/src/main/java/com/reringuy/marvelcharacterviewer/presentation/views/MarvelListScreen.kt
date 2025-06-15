@@ -133,7 +133,7 @@ fun MarvelCharacterDropDown(
     val commonInCardModifier = Modifier
         .fillMaxWidth()
         .padding(8.dp, 0.dp)
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(true) }
     var selectedText by remember { mutableStateOf("Loading list") }
 
     LaunchedEffect(characters) {
@@ -145,7 +145,7 @@ fun MarvelCharacterDropDown(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(12.dp)
             ),
     ) {
@@ -350,7 +350,7 @@ fun MarvelCharacterInfoPreview() {
             extension = "jpg"
         )
     )
-    MarvelCharacterViewerTheme {
+    MarvelCharacterViewerTheme(darkTheme = true) {
         MarvelCharacterInfo(Modifier, currentCharacter) {}
     }
 }
