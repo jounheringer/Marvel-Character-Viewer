@@ -54,7 +54,7 @@ fun MarvelComicInfo(comic: MarvelComic) {
             style = MaterialTheme.typography.headlineMedium
         )
         Text(
-            text = comic.description,
+            text = comic.description ?: "",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge
         )

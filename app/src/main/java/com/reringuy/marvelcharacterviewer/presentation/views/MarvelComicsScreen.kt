@@ -125,6 +125,10 @@ fun MarvelComicOption(comic: MarvelComic, onComicSelected: (MarvelComic) -> Unit
         onClick = { onComicSelected(comic) },
         shape = CutCornerShape(0.dp)
     ) {
+        Log.d("MarvelComicOption.title", "Comic: ${comic.title}")
+        Log.d("MarvelComicOption.description", "Comic: ${comic.description}")
+        Log.d("MarvelComicOption.id", "Comic: ${comic.id}")
+        Log.d("MarvelComicOption.issueNumber", "Comic: ${comic.issueNumber}")
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 modifier = Modifier.size(128.dp),
@@ -133,7 +137,7 @@ fun MarvelComicOption(comic: MarvelComic, onComicSelected: (MarvelComic) -> Unit
             )
             Column {
                 Text(text = comic.title)
-                Text(text = comic.description, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Text(text = comic.description ?: "", maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
         }
     }
