@@ -24,7 +24,7 @@ class MarvelComicsViewModel @Inject constructor(
     private val tokenManager: TokenManager,
     private val marvelRepository: MarvelRepository,
 ) : ViewModel() {
-    private val _effect = Channel<String>(Channel.BUFFERED)
+    private val _effect = Channel<MarvelComic>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
     private var _comicsList: Flow<PagingData<MarvelComic>>? = null
@@ -42,7 +42,7 @@ class MarvelComicsViewModel @Inject constructor(
     fun setCurrentComic(comic: MarvelComic) {
         viewModelScope.launch {
             tokenManager.saveComic(comic)
-            _effect.trySend("${comic.title} saved successfully.")
+            _effect.trySend(comic)
         }
     }
 

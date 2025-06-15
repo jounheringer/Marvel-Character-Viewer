@@ -1,11 +1,13 @@
 package com.reringuy.marvelcharacterviewer
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -16,22 +18,34 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.reringuy.marvelcharacterviewer.models.MarvelComic
+import com.reringuy.marvelcharacterviewer.presentation.views.MarvelComicDetailsScreen
 import com.reringuy.marvelcharacterviewer.ui.theme.MarvelCharacterViewerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ComicDetailsActivity: ComponentActivity() {
+class ComicDetailsActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            var topBarTitle by remember { mutableStateOf("Comic Details") }
+            val comic = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                intent.getParcelableExtra("comic", MarvelComic::class.java)
+            else{
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra<MarvelComic>("comic")
+            }
+
+            if (comic == null){
+                Log.e("ComicDetailsActivity", "Comic is null")
+                Toast.makeText(this, "Comic not found", Toast.LENGTH_SHORT).show()
+                goBack()
+            }
+
+            var topBarTitle = "#${comic!!.issueNumber} ${comic.title.substringBefore(" #")}"
+            Log.d("ComicDetailsActivity", "Comic: $topBarTitle")
             MarvelCharacterViewerTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
@@ -46,9 +60,10 @@ class ComicDetailsActivity: ComponentActivity() {
                         })
                     }
                 ) { innerPadding ->
-                    Box(Modifier.padding(innerPadding)){
-                        Text("Comic Details")
-                    }
+                    MarvelComicDetailsScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        comic = comic
+                    )
                 }
             }
         }

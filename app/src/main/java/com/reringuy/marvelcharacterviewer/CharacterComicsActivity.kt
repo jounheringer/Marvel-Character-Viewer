@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.reringuy.marvelcharacterviewer.models.MarvelComic
 import com.reringuy.marvelcharacterviewer.presentation.views.MarvelComicsWrapper
 import com.reringuy.marvelcharacterviewer.ui.theme.MarvelCharacterViewerTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -50,15 +51,16 @@ class CharacterComicsActivity : ComponentActivity() {
                     MarvelComicsWrapper(
                         modifier = Modifier.padding(innerPadding),
                         onCharacterNameLoaded = { topBarTitle = "$it Comics" },
-                        onComicSaved = { goToComicsDetail() }
+                        onComicSaved = { goToComicsDetail(it) }
                     )
                 }
             }
         }
     }
 
-    private fun goToComicsDetail() {
+    private fun goToComicsDetail(comic: MarvelComic) {
         val intent = Intent(this, ComicDetailsActivity::class.java)
+        intent.putExtra("comic", comic)
         startActivity(intent)
         finish()
     }

@@ -31,6 +31,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.AsyncImage
 import com.reringuy.marvelcharacterviewer.models.MarvelCharacter
 import com.reringuy.marvelcharacterviewer.models.MarvelComic
+import com.reringuy.marvelcharacterviewer.models.MarvelCreators
 import com.reringuy.marvelcharacterviewer.models.MarvelThumbnail
 import com.reringuy.marvelcharacterviewer.presentation.components.CharacterInfo
 import com.reringuy.marvelcharacterviewer.utils.OperationHandler
@@ -41,7 +42,7 @@ fun MarvelComicsWrapper(
     modifier: Modifier,
     viewModel: MarvelComicsViewModel = hiltViewModel(),
     onCharacterNameLoaded: (String) -> Unit,
-    onComicSaved: () -> Unit,
+    onComicSaved: (MarvelComic) -> Unit,
 ) {
     val comics = viewModel.comicsList?.collectAsLazyPagingItems()
     val currentCharacter by viewModel.currentCharacter.collectAsStateWithLifecycle()
@@ -49,8 +50,8 @@ fun MarvelComicsWrapper(
 
     LaunchedEffect(savedEffect) {
         savedEffect.collect {
-            Log.d("MarvelCharacter.Effect", it)
-            onComicSaved()
+            Log.d("MarvelCharacter.Effect", it.title)
+            onComicSaved(it)
         }
     }
 
@@ -143,10 +144,22 @@ fun MarvelComicsWrapperPreview() {
         val dummyComics = flowOf(
             PagingData.from(
                 listOf(
-                    MarvelComic(1, "Comic 1", "Description 1", 1f, MarvelThumbnail("path1", "jpg")),
-                    MarvelComic(2, "Comic 2", "Description 2", 2f, MarvelThumbnail("path2", "jpg")),
-                    MarvelComic(3, "Comic 3", "Description 3", 3f, MarvelThumbnail("path3", "jpg")),
-                    MarvelComic(1, "Comic 1", "Description 1", 1f, MarvelThumbnail("path1", "jpg")),
+                    MarvelComic(
+                        1, "Comic 1", "Description 1", 1f, MarvelThumbnail("path1", "jpg"),
+                        MarvelCreators(emptyList())
+                    ),
+                    MarvelComic(
+                        2, "Comic 2", "Description 2", 2f, MarvelThumbnail("path2", "jpg"),
+                        MarvelCreators(emptyList())
+                    ),
+                    MarvelComic(
+                        3, "Comic 3", "Description 3", 3f, MarvelThumbnail("path3", "jpg"),
+                        MarvelCreators(emptyList())
+                    ),
+                    MarvelComic(
+                        1, "Comic 1", "Description 1", 1f, MarvelThumbnail("path1", "jpg"),
+                        MarvelCreators(emptyList())
+                    ),
                 )
             )
         ).collectAsLazyPagingItems()
