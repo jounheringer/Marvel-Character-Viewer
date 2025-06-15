@@ -13,7 +13,8 @@ interface MarvelService {
         @Query("apikey") apiKey: String,
         @Query("hash") hash: String,
         @Query("limit") limit: Int = 20,
-        @Query("offset") offset: Int = 0
+        @Query("offset") offset: Int = 0,
+        @Query("nameStartsWith") nameStartsWith: String? = null
     ): MarvelResponse
 
     @GET("characters/{characterId}/comics")

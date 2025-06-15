@@ -20,13 +20,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
@@ -64,7 +67,13 @@ fun MarvelCharactersWrapper(
     val charactersList by viewModel.characters.collectAsStateWithLifecycle()
     val currentCharacter by viewModel.currentCharacter.collectAsStateWithLifecycle()
 
-    MarvelCharactersScreen(modifier, charactersList, currentCharacter, onListComics) {
+    MarvelCharactersScreen(
+        modifier,
+        charactersList,
+        currentCharacter,
+        onListComics,
+        viewModel::setCharactersByName
+    ) {
         viewModel.setCurrentCharacter(it)
     }
 }
@@ -75,6 +84,7 @@ fun MarvelCharactersScreen(
     characters: OperationHandler<List<MarvelCharacter>>,
     currentCharacter: OperationHandler<MarvelCharacter>,
     onListComics: () -> Unit,
+    onCharacterName: (String?) -> Unit,
     onCharacterSelected: (MarvelCharacter) -> Unit,
 ) {
     Box(
@@ -89,7 +99,8 @@ fun MarvelCharactersScreen(
 
             MarvelCharacterDropDown(
                 characters = characters,
-                onCharacterClick = onCharacterSelected
+                onCharacterClick = onCharacterSelected,
+                onCharacterName = onCharacterName
             )
         }
 
@@ -128,17 +139,20 @@ fun MarvelCharacterInfo(
 @Composable
 fun MarvelCharacterDropDown(
     characters: OperationHandler<List<MarvelCharacter>>,
+    onCharacterName: (String?) -> Unit,
     onCharacterClick: (MarvelCharacter) -> Unit,
 ) {
     val commonInCardModifier = Modifier
         .fillMaxWidth()
         .padding(8.dp, 0.dp)
-    var expanded by remember { mutableStateOf(true) }
+    var expanded by remember { mutableStateOf(false) }
     var selectedText by remember { mutableStateOf("Loading list") }
 
     LaunchedEffect(characters) {
         if (characters is OperationHandler.Success)
             selectedText = "Select your character"
+        if (characters is OperationHandler.Loading)
+            selectedText = "Loading list"
     }
 
     Column(
@@ -177,7 +191,14 @@ fun MarvelCharacterDropDown(
         }
 
         if (expanded && characters is OperationHandler.Success)
-            MarvelCharactersList(commonInCardModifier, characters.data) {
+            MarvelCharactersList(
+                commonInCardModifier,
+                characters.data,
+                {
+                    onCharacterName(it)
+                    expanded = true
+                }
+            ) {
                 expanded = false
                 selectedText = it.name
                 onCharacterClick(it)
@@ -189,12 +210,32 @@ fun MarvelCharacterDropDown(
 fun MarvelCharactersList(
     modifier: Modifier,
     characters: List<MarvelCharacter>,
+    onCharacterName: (String?) -> Unit,
     onCharacterClick: (MarvelCharacter) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
             .heightIn(max = 500.dp)
     ) {
+        item {
+            MarvelCharacterFilterInput(onCharacterName)
+            HorizontalDivider(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 8.dp), thickness = 2.dp
+            )
+        }
+        if (characters.isEmpty())
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "No Characters found", style = MaterialTheme.typography.titleMedium)
+
+                }
+            }
         items(characters) {
             MarvelCharacterOption(it) {
                 onCharacterClick(it)
@@ -203,6 +244,25 @@ fun MarvelCharactersList(
     }
 }
 
+
+@Composable
+fun MarvelCharacterFilterInput(onCharacterName: (String?) -> Unit) {
+    var characterName by remember { mutableStateOf("") }
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        OutlinedTextField(
+            value = characterName,
+            onValueChange = { characterName = it },
+            label = { Text("Search for a character") },
+            placeholder = { Text("Spider") },
+            singleLine = true,
+            trailingIcon = {
+                IconButton(onClick = { onCharacterName(characterName.ifEmpty { null }) }) {
+                    Icon(Icons.Filled.Search, "Search")
+                }
+            }
+        )
+    }
+}
 
 @Composable
 fun MarvelCharacterOption(character: MarvelCharacter, onCharacterClick: (MarvelCharacter) -> Unit) {
@@ -329,9 +389,9 @@ fun MarvelCharactersScreenPreview() {
     MarvelCharacterViewerTheme {
         MarvelCharactersScreen(
             Modifier,
-            OperationHandler.Success(marvelCharacters),
+            OperationHandler.Success(emptyList()),
             OperationHandler.Error("asdasd"),
-            {}) {
+            {}, {}) {
 
         }
     }

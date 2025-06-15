@@ -68,4 +68,12 @@ class MarvelCharactersViewModel @Inject constructor(
         }
     }
 
+    fun setCharactersByName(name: String?) {
+        _characters.value = OperationHandler.Loading
+        viewModelScope.launch {
+            val characters = marvelRepository.getCharacters(name)
+            _characters.value = OperationHandler.Success(characters)
+        }
+    }
+
 }

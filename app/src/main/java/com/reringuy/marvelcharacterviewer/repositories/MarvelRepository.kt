@@ -13,7 +13,7 @@ class MarvelRepository @Inject constructor(
     private val publicKey: String,
     private val privateKey: String
 ) {
-    suspend fun getCharacters(): List<MarvelCharacter>{
+    suspend fun getCharacters(name: String? = null): List<MarvelCharacter>{
         val timeStamp = System.currentTimeMillis().toString()
         val hash = generateMarvelHash(timeStamp, privateKey, publicKey)
         return marvelService.getCharacters(
@@ -21,7 +21,8 @@ class MarvelRepository @Inject constructor(
             apiKey = publicKey,
             hash = hash,
             limit = 100,
-            offset = 0
+            offset = 0,
+            nameStartsWith = name
         ).data.results
     }
 
